@@ -25,7 +25,7 @@ schedule(1, 0, -1)
 
 async function start() {
   if (csound == null) {
-    const { Csound } = await import('../js/csound.js');
+    const { Csound } = await import('./js/csound.js');
     csound = await Csound();
     await csound.setOption("-odac");
     await csound.compileOrc(code);
@@ -197,6 +197,6 @@ setInterval(() => {
 
 <hr>
 <p><a href="./readme.html">README</a></p>
-<!-- hhmts start -->Last modified: Sun Apr  6 14:35:17 IST 2025 <!-- hhmts end -->
+<!-- hhmts start -->Last modified: Sun Apr  6 15:51:01 IST 2025 <!-- hhmts end -->
 </body>
 </html>
