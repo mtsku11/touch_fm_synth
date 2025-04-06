@@ -32,6 +32,9 @@ async function start() {
     await csound.setControlChannel('amp', 0.5);
     await csound.setControlChannel('freq', 0); // Default
     await csound.start();
+
+    connectToGarmin();
+
     document.getElementById("start button").value = "ON";
     document.getElementById("start button").style.color = "red";
   } else {
@@ -191,12 +194,8 @@ setInterval(() => {
   </p>
 </div>
 
-<p>
-  <button onclick="connectToGarmin()">Connect to Garmin Sensor</button>
-</p>
-
 <hr>
 <p><a href="./readme.html">README</a></p>
-<!-- hhmts start -->Last modified: Sun Apr  6 15:51:01 IST 2025 <!-- hhmts end -->
+<!-- hhmts start -->Last modified: Sun Apr  6 16:05:56 IST 2025 <!-- hhmts end -->
 </body>
 </html>
