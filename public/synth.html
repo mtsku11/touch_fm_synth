@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>FM Synth with Start + Touch Trigger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: black;
+      color: lime;
+      font-family: monospace;
+      text-align: center;
+      padding-top: 30px;
+    }
+    button {
+      font-size: 1em;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎛️ FM Synth Receiver</h1>
+  <button id="startBtn">Start Audio</button>
+  <p>Amp: <span id="ampval">--</span></p>
+  <p>Freq: <span id="freqval">--</span> Hz</p>
+  <p>Mod Index: <span id="modIndexVal">--</span></p>
+  <p>Mod Freq: <span id="modFreqVal">--</span> Hz</p>
+
+  <script type="module">
+    let csound;
+    let instrumentOn = false;
+    let touchTimeout;
+
+    const code = `
+instr 1
+  kamp = port(chnget:k("amp"), 0.01)
+  kfreq = port(chnget:k("freq"), 0.05)
+  kmodIndex = port(chnget:k("modIndex"), 0.1)
+  kmodFreq = port(chnget:k("modFreq"), 0.1)
+
+  kenv linsegr 0, 0.01, 1, 0.4, 0
+  amod oscili kmodIndex * kfreq, kmodFreq
+  acar oscili 0dbfs * kamp * kenv, kfreq + amod
+  out acar
+endin
+`;
+
+    document.getElementById("startBtn").addEventListener("click", async () => {
+      if (!csound) {
+        const { Csound } = await import('./js/csound.js');
+        csound = await Csound();
+        await csound.setOption("-odac");
+        await csound.compileOrc(code);
+        await csound.setControlChannel("amp", 0.5);
+        await csound.setControlChannel("freq", 440);
+        await csound.setControlChannel("modIndex", 0.5);
+        await csound.setControlChannel("modFreq", 220);
+        await csound.start();
+
+        const ctx = csound.audioContext || csound.ctx;
+        if (ctx && ctx.state === "suspended") {
+          await ctx.resume();
+        }
+
+        document.getElementById("startBtn").disabled = true;
+        document.getElementById("startBtn").textContent = "Audio Running";
+        console.log("🎶 Csound ready");
+      }
+    });
+
+    const socket = new WebSocket("ws://" + location.hostname + ":8080");
+
+    socket.onopen = () => {
+      console.log("🎛️ WebSocket connected");
+      socket.send(JSON.stringify({ type: "register", role: "synth" }));
+    };
+
+    socket.onmessage = async (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "touch" && csound) {
+        const amp = data.carrier.x;
+        const freq = 100 + data.carrier.y * 1000;
+        const modIndex = data.modulator ? data.modulator.x : 0;
+        const modFreq = data.modulator ? 100 + data.modulator.y * 1000 : 0;
+
+        document.getElementById("ampval").textContent = amp.toFixed(2);
+        document.getElementById("freqval").textContent = freq.toFixed(0);
+        document.getElementById("modIndexVal").textContent = modIndex.toFixed(2);
+        document.getElementById("modFreqVal").textContent = modFreq.toFixed(0);
+
+        await csound.setControlChannel("amp", amp);
+        await csound.setControlChannel("freq", freq);
+        await csound.setControlChannel("modIndex", modIndex);
+        await csound.setControlChannel("modFreq", modFreq);
+
+        if (!instrumentOn) {
+          await csound.inputMessage("i1 0 -1");
+          instrumentOn = true;
+          console.log("▶️ Instrument started");
+        }
+
+        clearTimeout(touchTimeout);
+        touchTimeout = setTimeout(async () => {
+          if (instrumentOn) {
+            await csound.inputMessage("i-1 0 1");
+            instrumentOn = false;
+            console.log("⏹ Instrument stopped");
+          }
+        }, 300);
+      }
+    };
+  </script>
+</body>
+</html>

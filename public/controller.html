@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Touch Controller</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      touch-action: none;
+      background: black;
+      color: lime;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #xy-pad {
+      border: 2px solid lime;
+      width: 90vw;
+      height: 70vh;
+      touch-action: none;
+      background: #111;
+      position: relative;
+    }
+    .dot {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: lime;
+      border-radius: 50%;
+      transform: translate(-10px, -10px);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>🟢 Multi-Touch Controller</h2>
+  <div id="xy-pad">
+    <div class="dot" id="dot1"></div>
+    <div class="dot" id="dot2"></div>
+  </div>
+
+  <script>
+    const pad = document.getElementById('xy-pad');
+    const dot1 = document.getElementById('dot1');
+    const dot2 = document.getElementById('dot2');
+
+    const socket = new WebSocket("ws://" + location.hostname + ":8080");
+
+    socket.onopen = () => {
+      console.log("✅ WebSocket connected");
+      socket.send(JSON.stringify({ type: "register", role: "controller" }));
+    };
+
+    pad.addEventListener('touchmove', (e) => {
+      if (e.touches.length < 1) return;
+
+      const rect = pad.getBoundingClientRect();
+      const t1 = e.touches[0];
+      const carrier = {
+        x: (t1.clientX - rect.left) / rect.width,
+        y: 1 - ((t1.clientY - rect.top) / rect.height)
+      };
+      dot1.style.left = `${carrier.x * 100}%`;
+      dot1.style.top = `${(1 - carrier.y) * 100}%`;
+
+      let modulator = null;
+      if (e.touches.length > 1) {
+        const t2 = e.touches[1];
+        modulator = {
+          x: (t2.clientX - rect.left) / rect.width,
+          y: 1 - ((t2.clientY - rect.top) / rect.height)
+        };
+        dot2.style.left = `${modulator.x * 100}%`;
+        dot2.style.top = `${(1 - modulator.y) * 100}%`;
+      }
+
+      socket.send(JSON.stringify({ type: "touch", carrier, modulator }));
+    });
+  </script>
+</body>
+</html>

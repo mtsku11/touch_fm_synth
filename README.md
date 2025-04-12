@@ -1,108 +1,77 @@
-# BLE Speed Sensor Web Audio Example
+# Touch-Controlled FM Synth (Web-Based)
 
-This example builds on the principles of the *Sliders* demo and integrates real-time physical sensor input using the Bluetooth Low Energy (BLE) protocol. Specifically, it connects to a **Garmin speed sensor**, translating the wheel’s revolution speed into pitch in a **Csound** synthesizer.
+This project is a browser-based FM synthesizer that can be controlled from any device using a touch interface. It uses WebSockets to connect a controller (e.g., a mobile phone) to the synth running in a browser on a desktop.
 
----
+## 🎛 Project Structure
 
-## Key Features
-
-- Real-time interaction via BLE.
-- Dynamic pitch control driven by sensor data.
-- Visual display of speed (in km/h) and frequency (Hz).
-- Automatic idle detection and pitch reset.
-- Adaptive smoothing and intelligent pitch holding at low speeds.
-
----
-
-## What This Example Covers
-
-This version moves on from traditional HTML sliders to explore:
-
-- **Continuous control from a physical device** (a BLE speed sensor).
-- **Bus-based parameter control** in Csound using the `.setControlChannel()` method.
-- **Adaptive logic** for idle state detection and pitch behavior at low speeds.
-
-We still preserve the original principle of **user-initiated audio context**: Csound starts only after clicking the start button. This is necessary for browser compatibility, since most browsers restrict autoplay of audio without user interaction.
-
----
-
-## How the Start Button Works
-
-The button now performs dual roles:
-
-1. **Starts and stops** the Csound engine.
-2. **Connects to the BLE sensor**.
-
-When clicked:
-- If Csound is not initialized, it loads and starts the Csound engine.
-- Then, it connects to the Garmin speed sensor.
-- The engine starts instrument 1 and begins receiving BLE updates.
-- Clicking again toggles the instance off/on.
-
----
-
-## BLE Sensor Integration
-
-The Garmin sensor provides:
-- **Cumulative revolutions**
-- **Timestamp in 1/1024 second resolution**
-
-The JavaScript extracts the revolution delta and time delta, then calculates:
-- **Speed (km/h)**  
-- **Frequency (Hz)** via a formula: `frequency = speed * 100`, mapped between 0 Hz and 3000 Hz for a speed range of 0–30 km/h.
-
-A **speedometer display** shows the current speed, and the frequency is updated in real-time via:
-
-```js
-csound.setControlChannel('freq', computedFreq);
+```
+touch-synth/
+├── server.js               # Node.js WebSocket relay + static file server
+├── package.json            # Dependencies: express, ws
+└── public/
+    ├── synth.html          # FM synth controlled by WebSocket
+    ├── controller.html     # Touch XY pad controller with multitouch
+    └── js/
+        └── csound.js       # Csound WebAssembly module (add manually)
 ```
 
 ---
 
-## Idle Detection
+## 🚀 Quick Start (Local)
 
-If the sensor stops reporting new revolutions for a short period:
-- The system sets an `idle = true` state.
-- Frequency resets to **0 Hz** (silence).
-- Speed display shows **0.00 km/h**.
+### 1. Install dependencies
 
-An **adaptive timeout** is applied:
-- Fast speeds return to idle quickly.
-- Speeds below ~6.5 km/h delay idle activation for a smoother experience.
-
----
-
-## Csound Code
-
-```csound
-instr 1
-  kamp = port(chnget:k("amp"),0.01,-1)
-  kfreq = port(chnget:k("freq"),0.01,-1)
-  out linenr(vco2(0dbfs*kamp,kfreq,10),0.01,0.5,0.01)
-endin
-schedule(1,0,-1)
+```bash
+npm install
 ```
 
-Portamento smooths transitions in amplitude and frequency. Instrument 1 runs continuously, responding to control bus updates.
+### 2. Run the WebSocket + static file server
 
----
-
-## HTML Structure
-
-The HTML interface consists of:
-- A **Start button** that invokes `start()`.
-- Two **display fields**:
-  - Frequency (`freqval`)
-  - Speed (`speedval`)
-
-```html
-<input type="button" id="start button" onclick="start()" value="OFF">
-<p>Frequency: <span id="freqval">0</span> Hz</p>
-<p>Speed: <span id="speedval">0.00</span> km/h</p>
+```bash
+node server.js
 ```
 
+### 3. Open in your browser
+
+- On your **desktop**:  
+  `http://localhost:8080/fm-synth-with-start.html`
+
+- On your **phone (same Wi-Fi)**:  
+  `http://<your-computer-ip>:8080/fm-controller.html`
+
 ---
 
-## Conclusion
+## 🌐 Hosting
 
-This example demonstrates how to integrate a BLE speed sensor with the Csound audio engine in the browser, offering a real-time sonic representation of motion. It highlights the flexibility of Csound's software bus and the expressive potential of physical interaction as a control source.
+### ✅ Frontend (Static Files) — Recommended: **Netlify**
+
+1. Push `/public` folder to GitHub
+2. Link repo to [https://www.netlify.com/](https://www.netlify.com/)
+3. Set build = `none`, publish = `public/`
+
+### ✅ Backend (WebSocket Server) — Recommended: **Render**
+
+1. Push full project (including `server.js`) to GitHub
+2. Go to [https://render.com/](https://render.com/)
+3. Create a new **Web Service**
+4. Select your GitHub repo
+5. Start command: `node server.js`
+
+---
+
+## 🧠 Notes
+
+- WebSocket URL should remain:  
+  `ws://your-domain:8080`  
+  or use `wss://` if deploying secure WebSocket relay
+
+- Csound WebAssembly files (`csound.js`, `csound.wasm`) must be placed in `/public/js/` before deployment
+
+---
+
+## 👋 Credits
+
+Built with ❤️ using:
+- Csound
+- Web Audio API
+- Express + WebSockets
