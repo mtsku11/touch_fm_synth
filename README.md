@@ -6,13 +6,13 @@ Project Structure
 
 ```
 touch-synth/
-├── server.js               # Node.js WebSocket relay + static file server
-├── package.json            # Dependencies: express, ws
+├── server.js               //Node.js WebSocket relay + static file server
+├── package.json            //Dependencies: express, ws
 └── public/
-    ├── synth.html          # FM synth controlled by WebSocket
-    ├── controller.html     # Touch XY pad controller with multitouch
+    ├── synth.html          //FM synth controlled by WebSocket
+    ├── controller.html     //Touch XY pad controller with multitouch
     └── js/
-        └── csound.js       # Csound WebAssembly module (add manually)
+        └── csound.js       //Csound WebAssembly module (add manually)
 ```
 
 ---
