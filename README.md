@@ -1,8 +1,8 @@
-# Touch-Controlled FM Synth (Web-Based)
+Touch-Controlled FM Synth (Web-Based)
 
 This project is a browser-based FM synthesizer that can be controlled from any device using a touch interface. It uses WebSockets to connect a controller (e.g., a mobile phone) to the synth running in a browser on a desktop.
 
-## 🎛 Project Structure
+Project Structure
 
 ```
 touch-synth/
@@ -17,21 +17,21 @@ touch-synth/
 
 ---
 
-## 🚀 Quick Start (Local)
+Quick Start (Local)
 
-### 1. Install dependencies
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Run the WebSocket + static file server
+2. Run the WebSocket + static file server
 
 ```bash
 node server.js
 ```
 
-### 3. Open in your browser
+3. Open in your browser
 
 - On your **desktop**:  
   `http://localhost:8080/fm-synth-with-start.html`
@@ -41,15 +41,15 @@ node server.js
 
 ---
 
-## 🌐 Hosting
+Hosting
 
-### ✅ Frontend (Static Files) — Recommended: **Netlify**
+Frontend (Static Files) — Recommended: **Netlify**
 
 1. Push `/public` folder to GitHub
 2. Link repo to [https://www.netlify.com/](https://www.netlify.com/)
 3. Set build = `none`, publish = `public/`
 
-### ✅ Backend (WebSocket Server) — Recommended: **Render**
+Backend (WebSocket Server) — Recommended: **Render**
 
 1. Push full project (including `server.js`) to GitHub
 2. Go to [https://render.com/](https://render.com/)
@@ -59,7 +59,7 @@ node server.js
 
 ---
 
-## 🧠 Notes
+Notes
 
 - WebSocket URL should remain:  
   `ws://your-domain:8080`  
@@ -69,9 +69,8 @@ node server.js
 
 ---
 
-## 👋 Credits
 
-Built with ❤️ using:
+Built using:
 - Csound
 - Web Audio API
 - Express + WebSockets
