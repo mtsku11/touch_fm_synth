@@ -6,16 +6,15 @@ Project Structure
 
 ```
 touch-synth/
-├── server.js               //Node.js WebSocket relay + static file server
-├── package.json            //Dependencies: express, ws
+├── server.js               # Node.js WebSocket relay + static file server
+├── package.json            # Dependencies: express, ws
 └── public/
-    ├── synth.html          //FM synth controlled by WebSocket
-    ├── controller.html     //Touch XY pad controller with multitouch
+    ├── synth.html          # FM synth controlled by WebSocket
+    ├── controller.html     # Touch XY pad controller with multitouch
     └── js/
-        └── csound.js       //Csound WebAssembly module (add manually)
+        └── csound.js       # Csound WebAssembly module (add manually)
 ```
 
----
 
 Quick Start (Local)
 
@@ -39,7 +38,6 @@ node server.js
 - On your **phone (same Wi-Fi)**:  
   `http://<your-computer-ip>:8080/fm-controller.html`
 
----
 
 Hosting
 
@@ -57,7 +55,6 @@ Backend (WebSocket Server) — Recommended: **Render**
 4. Select your GitHub repo
 5. Start command: `node server.js`
 
----
 
 Notes
 
@@ -67,7 +64,6 @@ Notes
 
 - Csound WebAssembly files (`csound.js`, `csound.wasm`) must be placed in `/public/js/` before deployment
 
----
 
 
 Built using:
