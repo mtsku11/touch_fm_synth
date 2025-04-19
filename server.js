@@ -6,31 +6,31 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-let synthClient = null;
-
 wss.on('connection', ws => {
-  console.log("🔌 Client connected");
+  console.log("Client connected");
 
   ws.on('message', msg => {
     const data = JSON.parse(msg);
 
-    if (data.type === 'register' && data.role === 'synth') {
-      synthClient = ws;
-      console.log("🎛️ Synth registered");
-    } else if (data.type === 'touch' && synthClient) {
-      synthClient.send(JSON.stringify(data));
-      console.log("🟢 Forwarded touch:", data);
+    if (data.type === 'touch' || data.type === 'tilt' || data.type === 'off') {
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(data));
+        }
+      });
+      console.log(`Forwarded ${data.type}:`, data);
+    } else {
+      console.log("Unknown or unhandled message:", data);
     }
   });
 
   ws.on('close', () => {
-    if (ws === synthClient) synthClient = null;
-    console.log("❌ Client disconnected");
+    console.log("Client disconnected");
   });
 });
 
 app.use(express.static('public'));
 
 server.listen(8080, () => {
-  console.log("🚀 WebSocket relay + static server running at http://localhost:8080");
+  console.log("WebSocket relay + static server running at http://localhost:8080");
 });
